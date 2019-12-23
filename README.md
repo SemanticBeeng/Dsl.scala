@@ -1,7 +1,7 @@
 # Dsl.scala <a href="http://thoughtworks.com/"><img align="right" src="https://www.thoughtworks.com/imgs/tw-logo.png" title="ThoughtWorks" height="15"/></a>
 
 [![Build Status](https://travis-ci.org/ThoughtWorksInc/Dsl.scala.svg?branch=master)](https://travis-ci.org/ThoughtWorksInc/Dsl.scala)
-[![Latest version](https://index.scala-lang.org/thoughtworksinc/dsl.scala/dsl/latest.svg)](https://index.scala-lang.org/thoughtworksinc/dsl.scala)
+[![Latest version](https://index.scala-lang.org/ThoughtWorksInc/Dsl.scala/latest.svg)](https://index.scala-lang.org/ThoughtWorksInc/Dsl.scala)
 [![Scaladoc](https://javadoc.io/badge/com.thoughtworks.dsl/dsl_2.12.svg?label=scaladoc)](https://javadoc.io/page/com.thoughtworks.dsl/dsl_2.12/latest/com/thoughtworks/dsl/index.html) [![Join the chat at https://gitter.im/ThoughtWorksInc/Dsl.scala](https://badges.gitter.im/ThoughtWorksInc/Dsl.scala.svg)](https://gitter.im/ThoughtWorksInc/Dsl.scala?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 **Dsl.scala** is a framework to create embedded **D**omain-**S**pecific **L**anguages in Scala.
@@ -14,7 +14,7 @@ We also provide some built-in keywords, including:
 
  * The `Await` keyword for creating memoized asynchronous values as Scala [Future](https://docs.scala-lang.org/overviews/core/futures.html)s, similar to the `await` / `async` keywords in C#, Python and JavaScript.
  * The `Shift` keyword for creating asynchronous tasks as delimited continuations, similar to the `shift` operator in [Scala Continuations](https://github.com/scala/scala-continuations).
- * The `AsynchronousIo.Connect`, `AsynchronousIo.Accept`, `AsynchronousIo.Read` and `AsynchronousIo.Write` keyword for perform I/O on an asynchronous channel.
+ * The `AsynchronousIo.Connect`, `AsynchronousIo.Accept`, `AsynchronousIo.Read` and `AsynchronousIo.Write` keywords for performing I/O on an asynchronous channel.
  * The `Yield` keyword for generating lazy streams, similar to `yield` in C#, Python and JavaScript.
  * The `Each` keyword for iterating on a collection, similar to the list comprehension feature in Scala, Haskell, OCaml, Python and Lisp.
  * The `Continue` keyword LDK for skipping an element in a `Each` collection comprehension, similar to the native `continue` keyword in C/C++ or the `mzero` in Haskell.
@@ -25,7 +25,7 @@ We also provide some built-in keywords, including:
  * The `NullSafe` keyword for the null safe operator, similar to the `?` operator in Kotlin and Groovy.
  * The `NoneSafe` keyword for the `None` safe operator, similar to the `Maybe` monad in Haskell.
 
-All the above keywords can be used together with each others. For example you can perform list comprehension to manipulate native resources in an asynchronous task by using `Each`, `AutoClose` and `Shift` together.
+All the above keywords can be used together with each others. For example you can perform list comprehension to manipulate native resources in an asynchronous task by using `Each`, `Using` and `Shift` together.
 
 ## Getting Started
 
@@ -49,8 +49,9 @@ addCompilerPlugin("com.thoughtworks.dsl" %% "compilerplugins-reseteverywhere" % 
 The random number generator can be implemented as a recursive function that produces the next random number in each iteration.
 
 ```scala
-import com.thoughtworks.dsl.keys.Yield
-def xorshiftRandomGenerator(seed: Int): Stream[Int] = {
+import com.thoughtworks.dsl.keywords.Yield
+// Must not annotated with @tailrec
+def xorshiftRandomGenerator(seed: Int): scala.collection.immutable.Stream[Int] = {
   val tmp1 = seed ^ (seed << 13)
   val tmp2 = tmp1 ^ (tmp1 >>> 17)
   val tmp3 = tmp2 ^ (tmp2 << 5)

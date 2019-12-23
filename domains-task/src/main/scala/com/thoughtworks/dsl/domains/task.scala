@@ -100,7 +100,7 @@ object task {
       (newBuilder[Element, That] += element).result()
     }
 
-    def onComplete[A](task: Task[A])(continue: (Try[A] => Unit)) = {
+    def onComplete[A](task: Task[A])(continue: Try[A] => Unit) = {
       Continuation
         .toTryContinuation(task) { result =>
           TailCalls.done(continue(result))
@@ -125,6 +125,10 @@ object task {
       }
     }
 
+    /** Converts a [[Task]] to a [[scala.concurrent.Future]].
+      *
+      * @see [[keywords.Await]] for converting a [[scala.concurrent.Future]] to a [[Task]].
+      */
     def toFuture[A](task: Task[A]): Future[A] = {
       val promise = Promise[A]()
       Continuation

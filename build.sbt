@@ -168,7 +168,7 @@ lazy val `keywords-Await` =
       scalacOptions += raw"""-Xplugin:${(packageBin in `compilerplugins-BangNotation` in Compile).value}""",
       scalacOptions += raw"""-Xplugin:${(packageBin in `compilerplugins-ResetEverywhere` in Compile).value}"""
     )
-    .dependsOn(Dsl, `keywords-Yield` % Test)
+    .dependsOn(Dsl, `keywords-Yield` % Test, `domains-task` % Test, `keywords-Return` % Test, `keywords-Catch` % Test)
 lazy val `keywords-AwaitJS` = `keywords-Await`.js
 lazy val `keywords-AwaitJVM` = `keywords-Await`.jvm
 
@@ -250,8 +250,6 @@ lazy val `package` = project
 
 organization in ThisBuild := "com.thoughtworks.dsl"
 
-crossScalaVersions in ThisBuild := Seq("2.13.0-M4", "2.12.8", "2.11.12")
-
 scalacOptions in ThisBuild ++= {
   if (scalaBinaryVersion.value == "2.11") {
     Some("-Ybackend:GenBCode")
@@ -262,11 +260,13 @@ scalacOptions in ThisBuild ++= {
 
 lazy val unidoc =
   project
-    .enablePlugins(StandaloneUnidoc, TravisUnidocTitle)
+    .enablePlugins(ScalaUnidocPlugin)
     .settings(
+      publishArtifact := false,
       unidocProjectFilter in ScalaUnidoc in BaseUnidocPlugin.autoImport.unidoc := {
         import Ordering.Implicits._
         if (VersionNumber(scalaVersion.value).numbers >= Seq(2L, 13L)) {
+          // Workaround for https://github.com/scala/bug/issues/11045
           (
             inDependencies(`package`) ||
             inDependencies(`compilerplugins-BangNotation`) ||
@@ -304,14 +304,10 @@ lazy val unidoc =
       }
     )
 
-publishArtifact := false
+skip in publish := true
 
 parallelExecution in Global := {
   import Ordering.Implicits._
   VersionNumber(scalaVersion.value).numbers >= Seq(2L, 12L)
 }
 
-import sbtrelease.ReleaseStateTransformations._
-releaseProcess -= runTest
-
-Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)

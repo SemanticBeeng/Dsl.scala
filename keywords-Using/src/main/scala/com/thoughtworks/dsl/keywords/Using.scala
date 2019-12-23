@@ -18,24 +18,23 @@ final case class Using[R <: AutoCloseable](open: () => R) extends AnyVal with Ke
   */
 object Using {
 
-  implicit def implicitAutoClose[R <: AutoCloseable](r: => R): Using[R] = Using[R](r _)
+  implicit def implicitUsing[R <: AutoCloseable](r: => R): Using[R] = Using[R](r _)
 
   def apply[R <: AutoCloseable](r: => R)(
       implicit dummyImplicit: DummyImplicit = DummyImplicit.dummyImplicit): Using[R] = new Using(r _)
 
-  implicit def throwableContinuationAutoCloseDsl[Domain, Value, R <: AutoCloseable](
+  implicit def throwableContinuationUsingDsl[Domain, Value, R <: AutoCloseable](
       implicit catchDsl: CatchDsl[Domain, Domain, Value],
       shiftDsl: Dsl[Shift[Domain, Value], Domain, Value]
   ): Dsl[Using[R], Domain !! Value, R] =
     new Dsl[Using[R], Domain !! Value, R] {
       def cpsApply(keyword: Using[R], handler: R => Domain !! Value): Domain !! Value = _ {
         val r = keyword.open()
-        val scopeResult = try {
+        try {
           !Shift(handler(r))
         } finally {
           r.close()
         }
-        scopeResult
       }
 
     }
